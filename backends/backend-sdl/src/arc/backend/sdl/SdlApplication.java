@@ -112,6 +112,8 @@ public class SdlApplication implements Application{
         NativeUtils.forceUtf8Locale();
 
         if(OS.isMac) restartMac();
+        //wayland is broken and newer SDL versions force it
+        if(OS.isLinux && !OS.hasEnvFlag("MINDUSTRY_FORCE_WAYLAND")) SDL_SetHint("SDL_VIDEO_DRIVER", "x11");
 
         check(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS));
 
@@ -276,8 +278,8 @@ public class SdlApplication implements Application{
     @Override
     public boolean openURI(String url){
 
-        //make sure it's a valid URI
-        if(url.isEmpty()) return false;
+        //make sure it's a valid URI; a leading dash would be interpreted as an option by the commands below
+        if(url.isEmpty() || url.startsWith("-")) return false;
         try{
             URI.create(url);
         }catch(Exception wrong){
